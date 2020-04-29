@@ -47,19 +47,56 @@ class Assembler:
                 self.CI = 0
                 return
             else:
-                if i[0]:
-                    if i[0] not in self.symbolsTable:
-                        value = ""
-                        if not i[2].isalpha() and not i[2].lower().islower():
-                            value = "0x" + i[2]
+                if i[0] and i[0] not in self.symbolsTable:
 
-                        self.symbolsTable[i[0]] = {
-                            "defined" : True, 
-                            "address" : hex(self.CI),
-                            "value"   : value or i[2]
+                    value = False
+                    if "/" in i[2]:
+                        value = i[2].split("/")[1]
+                    self.symbolsTable[i[0]] = {
+                        "defined" : True, 
+                        "address" : hex(self.CI),
+                        "value"   : value or i[2]
+                    }
+
+                    if not i[2].isdecimal() and "/" not in i[2]:
+                        
+                        self.symbolsTable[i[2]] = {
+                            "defined" : False, 
+                            "address" : "",
+                            "value"   : ""
                         }
-                    else:
-                        raise Exception('[Error] Double definition of value: {}'.format(i[0]))
+
+                elif i[0] and i[0] in self.symbolsTable and not self.symbolsTable[i[0]]["defined"]:
+                    
+                    self.symbolsTable[i[0]] = {
+                        "defined" : True, 
+                        "address" : hex(self.CI),
+                        "value"   : i[2]
+                    }
+
+                    for j in self.symbolsTable:
+                        if self.symbolsTable[j]["value"] == i[0]:
+                            self.symbolsTable[j]["value"] = hex(self.CI)
+
+                elif not i[0]:
+                    
+                    if not i[2].isdecimal() and "/" not in i[2]:
+                        if i[2] in self.symbolsTable:
+                            if not self.symbolsTable[i[2]]["defined"]:
+                                self.symbolsTable[i[2]] = {
+                                    "defined" : False, 
+                                    "address" : "",
+                                    "value"   : ""
+                                }
+                        else:
+                            self.symbolsTable[i[2]] = {
+                                "defined" : False, 
+                                "address" : "",
+                                "value"   : ""
+                            }
+
+                else:
+                    raise Exception('[Error] Double definition of value: {}'.format(i[0]))
                 self.CI = self.CI + 2
         self.CI = 0
         self.step = 2
@@ -74,36 +111,46 @@ class Assembler:
                 return self.objectCode
             elif i[1] == "@":
                 self.CI = int(i[2].split("/")[1], 16)
+
             elif i[1] in self.mnemonic:
-                instruction = "0x" + self.mnemonic[i[1]]["code"]
-                operand = 0
-                if i[2] in self.symbolsTable:
-                    operand = self.symbolsTable[i[2]]["value"]
-                    if operand in self.symbolsTable:
-                        operand = self.symbolsTable[operand]["value"]
-                    if len(operand.split("x")[1]) > 3:
-                        print(operand)
-                        raise Exception('[Error] Operand cannot have more than 12 bits')  
-                else:
-                    operand = i[2].split("/")[1]
-                    if len(operand) > 3:
-                        if operand[0] == "0":
-                            operand = operand[1:]
-                        else:
-                            raise Exception('[Error] Operand cannot have more than 12 bits')  
-                    operand = "0x" + operand
-                if len(operand) == 4:
-                    operand = "0x0" + operand.split("x")[1]
-                instruction = instruction + operand.split("x")[1]
+                
+                operation = i[1]
+                operand = i[2]
+                if "/" in operand:
+                    operand = hex(int(operand.split("/")[1], 16))
+
+                elif not operand.isdecimal():
+                    operand = self.symbolsTable[operand]["address"]
+                elif operand.isdecimal():
+                    operand = hex(int(operand, 16))
+                
+                operand = self.validateOperand(self.mnemonic[i[1]]["operand"], operand)
+                #print(i[0], operation, operand)
+
+
+                instruction = "0x" + self.mnemonic[i[1]]["code"] + operand.split("x")[1]
                 self.objectCode.append([hex(self.CI), instruction])
                 self.CI += self.mnemonic[i[1]]["size"]
 
         return self.objectCode
 
+    def validateOperand(self, type, operand):
+        if type == "address" or type == "12bitInt":
+            if len(operand) > 5:
+                raise Exception('[Error] Address should be 12 bits: {}'.format(address))
+            elif len(operand) == 3:
+                operand = "0x" + "00" + operand.split("x")[1]
+            elif len(operand) == 4:
+                
+                operand = "0x" + "0" + operand.split("x")[1]
+        elif type == "null":
+            operand = "0x000"
+        return operand
 
 
 a = Assembler()
 a.getInstructionsList('./userFiles/test.asm')
 a.buildSymbolsTable()
 c = a.assemble()
-print(c)
+for i in c:
+    print(i)
