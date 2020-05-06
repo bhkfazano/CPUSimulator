@@ -19,20 +19,7 @@ class Memory:
 
 
     def write(self, address, insert):
-        address  = hex(int(address, 16))
-        address2 = hex(int(address, 16) + 1)
-
-        data = insert.split("x")[1]
-
-        if len(data) == 4:
-            self.mem[address]  = "0x" + data[:2]
-            self.mem[address2] = "0x" + data[2:]
-        elif len(data) == 2:
-            self.mem[address]  = "0x00"
-            self.mem[address2] = "0x" + data
-        else:
-            raise Exception('[Error] Invalid size for memory writing: {}'.format(data))
-            return 0
+        self.mem[address]  = insert
         return 1
 
     def burn(self):
@@ -40,4 +27,8 @@ class Memory:
         for i in range(4069):
             file.write(hex(i) + "    " + self.mem[hex(i)] + "\n")
 
+    def store(self):
+    
+        file = open('./memory/memory.txt', 'r')
+        self.mem = dict(line.split() for line in file)
 

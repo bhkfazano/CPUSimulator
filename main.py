@@ -1,8 +1,12 @@
 import os
-from Assembler import *
-from memory.Memory import *
+from MVNSimulator import *
 
 def main():
+
+    simulator = MVNSimulator()
+    simulator.start()
+
+    objectCode = []
         
     print("\n" + "="*40 + " LISTA DE COMANDOS " + "="*40)
     print(" $LS                            : Lista os arquivos no diretório")
@@ -21,10 +25,20 @@ def main():
             for i in range(0, len(dir)):
                 print(str(i) + " | " + dir[i])
 
+        elif len(option.split()) == 2 and option.split()[0] == "MT":
+            
+            path = './userFiles/' + option.split()[1]
+            simulator.assemble(path)
+
+        elif  len(option.split()) == 2 and option.split()[0] == "EX":
+
+            file = open('./userFiles/' + option.split()[1], 'r')
+
+
         elif option == "Q": 
             exit()
 
         else:
             print(" Comando invalido")
 
-# main()
+main()

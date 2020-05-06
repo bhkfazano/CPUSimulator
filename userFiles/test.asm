@@ -1,6 +1,6 @@
             @       /0100
 INIC        LD      UM
-            LV      0012
+            LV      0112
             MM      /0112
             MM      IMPAR
             MM      N2

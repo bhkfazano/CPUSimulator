@@ -28,7 +28,7 @@ class Assembler:
         lines = [line.split() for line in file]
 
         for line in lines:
-            if len(line) < 3:
+            if len(line) > 0 and (line[0] in self.mnemonic or line[0] in self.pseudo):
                 line.insert(0, False)
 
         self.instructions = lines
@@ -36,9 +36,17 @@ class Assembler:
     def buildSymbolsTable(self):
 
         instr = self.instructions
-
+        
         for i in instr:
-            if i[1] not in self.mnemonic and i[1] not in self.pseudo:
+            if len(i) == 1:
+
+                self.symbolsTable[i[0]] = {
+                    "defined" : True, 
+                    "address" : hex(self.CI),
+                    "value"   : ""
+                }
+
+            elif i[1] not in self.mnemonic and i[1] not in self.pseudo:
                 raise Exception('[Error] Invalid instruction: {}'.format(i[1]))
             elif i[1] == "@":
                 self.CI = int(i[2].split("/")[1], 16)
@@ -101,18 +109,28 @@ class Assembler:
         self.CI = 0
         self.step = 2
 
-    def assemble(self):
+    def assemble(self, filePath):
+        self.reset()
+        self.getInstructionsList(filePath)
+        self.buildSymbolsTable()
         
         instr = self.instructions
-
         for i in instr:
-            if i[1] == "#":
-                print("Montagem finalizada")
+            if len(i) > 1 and i[1] == "#":
+                print(" Montagem finalizada")
+                self.store(filePath)
                 return self.objectCode
-            elif i[1] == "@":
+            elif len(i) > 1 and i[1] == "@":
                 self.CI = int(i[2].split("/")[1], 16)
 
-            elif i[1] in self.mnemonic:
+            elif len(i) > 1 and i[1] == "K":
+                operand = i[2]
+                if len(i[2]) == 1:
+                    operand = "0" + i[2]
+                self.objectCode.append([hex(self.CI).split("x")[1], "00" + operand[-2:]])
+                self.CI = self.CI + 2
+
+            elif len(i) > 1 and i[1] in self.mnemonic:
                 
                 operation = i[1]
                 operand = i[2]
@@ -127,15 +145,15 @@ class Assembler:
                 operand = self.validateOperand(self.mnemonic[i[1]]["operand"], operand)
                 #print(i[0], operation, operand)
 
-
-                instruction = "0x" + self.mnemonic[i[1]]["code"] + operand.split("x")[1]
-                self.objectCode.append([hex(self.CI), instruction])
+                instruction = self.mnemonic[i[1]]["code"] + operand.split("x")[1]
+                self.objectCode.append([hex(self.CI).split("x")[1], instruction])
                 self.CI += self.mnemonic[i[1]]["size"]
-
+      
+        self.store(filePath)
         return self.objectCode
 
     def validateOperand(self, type, operand):
-        if type == "address" or type == "12bitInt":
+        if type == "address":
             if len(operand) > 5:
                 raise Exception('[Error] Address should be 12 bits: {}'.format(address))
             elif len(operand) == 3:
@@ -143,14 +161,42 @@ class Assembler:
             elif len(operand) == 4:
                 
                 operand = "0x" + "0" + operand.split("x")[1]
+        if type == "8bit":
+            operand = "0x" + operand[-2:]
         elif type == "null":
             operand = "0x000"
         return operand
 
+    def reset(self):
 
-a = Assembler()
-a.getInstructionsList('./userFiles/test.asm')
-a.buildSymbolsTable()
-c = a.assemble()
-for i in c:
-    print(i)
+        self.objectCode = []
+        self.mnemonic = mnemonic
+        self.pseudo = pseudo
+        self.symbolsTable = {}
+        self.instructions = []
+        self.CI = 0
+        self.step = 1
+        self.mounted = False
+
+    def store(self, filePath):
+
+        fileName = filePath[:-3] + "hex"
+        file = open(fileName, 'w')
+
+        metadata = self.parseAddress(self.objectCode.copy()[0][0])
+        metadata.append(hex(len(self.objectCode)).split("x")[1])
+        for i in metadata:
+            file.write(i + "\n")   
+
+        for i in self.objectCode:
+            file.write(i[1] + "\n")
+        file.close()
+
+    def parseAddress(self, add):
+        if len(add) == 1:
+            add = "000" + add
+        elif len(add) == 2:
+            add = "00" + add
+        elif len(add) == 3:
+            add = "0" + add
+        return [add[0:2], add[2:]]
