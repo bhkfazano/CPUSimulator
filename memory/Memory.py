@@ -4,7 +4,7 @@ class Memory:
 
         file = open('./memory/memory.txt', 'w')
         for i in range (4096):
-            file.write(hex(i) + "    " + "0x00\n")
+            file.write(hex(i) + "    " + "00\n")
         file.close()
 
         file = open('./memory/memory.txt', 'r')

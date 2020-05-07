@@ -1,6 +1,7 @@
             @   /0
 START
             GD  0
+            +   AUX
             MM  POS1
             GD  0
             MM  POS2
@@ -8,7 +9,8 @@ START
             MM  SIZE
 LOOP
             GD  0
-            MM  POS1
+            JP  POS1
+RTR
             LD  POS2
             +   ONE
             MM  POS2
@@ -31,6 +33,8 @@ CHECK
 OK
 POS1        K  00
 POS2        K  00
+            JP RTR
 SIZE        K  00
 ONE         K  01
+AUX         K  90
             #  START

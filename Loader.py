@@ -18,16 +18,4 @@ class Loader:
         for i in insert[3:]:
             self.memory.write(hex(add), i)
             add += 1
-
-    def test(self, loader):
-        add = int(loader[0][0] + loader[1][0], 16)
-        for i in range(0, len(loader), 2):
-            if i < 6:
-                continue
-            else:
-                self.memory.write(hex(add), loader[i - 3][0][0:2])
-                self.memory.write(hex(add + 1), loader[i - 3][0][2:])
-            add += 2
         self.memory.burn()
-
-        return 1

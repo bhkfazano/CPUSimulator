@@ -162,7 +162,7 @@ class Assembler:
                 
                 operand = "0x" + "0" + operand.split("x")[1]
         if type == "8bit":
-            operand = "0x" + operand[-2:]
+            operand = "0x" + "0" + operand[-2:]
         elif type == "null":
             operand = "0x000"
         return operand

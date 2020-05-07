@@ -32,7 +32,8 @@ def main():
 
         elif  len(option.split()) == 2 and option.split()[0] == "EX":
 
-            file = open('./userFiles/' + option.split()[1], 'r')
+            path = option.split()[1]
+            simulator.run(path)
 
 
         elif option == "Q": 
