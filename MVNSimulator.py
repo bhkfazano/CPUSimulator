@@ -73,12 +73,21 @@ class MVNSimulator:
     def run(self, path):
 
         program = self.init(path)
-        
-        self.load(program[0])
+        for i in program:
+            self.load(i)
         self.memory.burn()
+        self.CI = int(program[0][0] + program[0][1], 16)
 
-
-
+        while True:
+            instr = self.memory.readInstruction(hex(self.CI))
+            print(instr, self.ACC)
+            if instr[0] == "F" or instr[0] == "f":
+                self.CI = 0
+                break
+            self.handleInstruction(instr, 0) 
+        
+        print("Output: ")
+        print("ACC: ", self.ACC)
 
     def jump(self, add):
         self.CI = int(add, 16)
