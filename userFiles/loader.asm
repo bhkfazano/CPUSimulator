@@ -2,18 +2,18 @@
 START
             GD  0
             +   AUX
-            MM  POS1
+            MM  MSB
             GD  0
-            MM  POS2
+            MM  LSB
             GD  0
             MM  SIZE
 LOOP
             GD  0
-            JP  POS1
+            JP  MSB
 RTR
-            LD  POS2
+            LD  LSB
             +   ONE
-            MM  POS2
+            MM  LSB
             JZ  CARRY
 RTN
             LD  SIZE
@@ -22,18 +22,17 @@ RTN
             JZ  CHECK
             JP  LOOP
 CARRY
-            LD  POS1
+            LD  MSB
             +   ONE
-            MM  POS1
-            +   ONE
+            MM  MSB
             JP  RTN
 CHECK
             GD  0
             JZ  OK
-OK
-POS1        K  00
-POS2        K  00
+MSB        K  00
+LSB        K  00
             JP RTR
+OK          OS 00
 SIZE        K  00
 ONE         K  01
 AUX         K  90

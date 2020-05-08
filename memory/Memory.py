@@ -10,15 +10,20 @@ class Memory:
         file = open('./memory/memory.txt', 'r')
         self.mem = dict(line.split() for line in file)
 
-    def read(self, address):
+    def readInstruction(self, address):
         address  = hex(int(address, 16))
         address2 = hex(int(address, 16) + 1)
+        data = self.mem[address] + self.mem[address2]
+        return data
 
-        data = self.mem[address] + self.mem[address2].split("x")[1]
+    def readByte(self, address):
+        address  = hex(int(address, 16))
+        data = self.mem[address]
         return data
 
 
     def write(self, address, insert):
+        print("MM: ", address, insert)
         self.mem[address]  = insert
         return 1
 

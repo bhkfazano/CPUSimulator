@@ -9,10 +9,10 @@ def main():
     objectCode = []
         
     print("\n" + "="*40 + " LISTA DE COMANDOS " + "="*40)
-    print(" $LS                            : Lista os arquivos no diretório")
-    print(" $MT <nome_do_arquivo.asm>      : Inicia o montador, realizando a conversão assembly -> hexadecimal")
-    print(" $EX <nome_do_arquivo.hex>      : Executa o programa indicado")
-    print(" $Q                             : Termina a execução")
+    print(" $ls                            : Lista os arquivos no diretório")
+    print(" $mt <nome_do_arquivo.asm>      : Inicia o montador, realizando a conversão assembly -> hexadecimal")
+    print(" $ex <nome_do_arquivo.hex>      : Executa o programa indicado")
+    print(" $q                             : Termina a execução")
 
     while(True):
 
@@ -25,18 +25,18 @@ def main():
             for i in range(0, len(dir)):
                 print(str(i) + " | " + dir[i])
 
-        elif len(option.split()) == 2 and option.split()[0] == "MT":
+        elif len(option.split()) == 2 and option.split()[0] == "mt":
             
             path = './userFiles/' + option.split()[1]
             simulator.assemble(path)
 
-        elif  len(option.split()) == 2 and option.split()[0] == "EX":
+        elif  len(option.split()) == 2 and option.split()[0] == "ex":
 
             path = option.split()[1]
             simulator.run(path)
 
 
-        elif option == "Q": 
+        elif option == "q": 
             exit()
 
         else:

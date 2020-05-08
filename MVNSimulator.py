@@ -17,6 +17,7 @@ class MVNSimulator:
         objectCode = self.assemble('./userFiles/loader.asm')
         file = open('./userFiles/loader.hex', 'r')
         lines = [line[:-1].split() for line in file]
+        lines.remove(["x"])
         self.loader.load(lines)
         self.memory.store()
 
@@ -26,37 +27,68 @@ class MVNSimulator:
         objectCode = self.assembler.assemble(path)
         return objectCode
 
-    def load(self, path):
+    def init(self, path):
         
         file = open('./userFiles/' + path, 'r')
         lines = [line.split()[0] for line in file]
-    
+
+        block = []
         insert = []
+
         for i in range(len(lines)):
-            if i < 3:
-                insert.append(lines[i])
+            
+            if lines[i] == "x":
+                insert.append(block)
+                block = []
+                continue
+
+            if len(lines[i]) <= 2:
+                    block.append(lines[i])
             else:
-                insert.append(lines[i][0:2])
-                insert.append(lines[i][2:])
-        
+                block.append(lines[i][0:2])
+                block.append(lines[i][2:])
         return insert
 
+    def load(self, program):
+        
+        op = ""
+        counter = 0
+        self.CI = 0
+        while True:
+            
+            instr = self.memory.readInstruction(hex(self.CI))
+            print("CI | instr | ACC: ", hex(self.CI), instr, hex(self.ACC))
+            if instr[0] == "D":
+                self.handleInstruction(instr, program[counter])
+                counter += 1
+                if counter == len(program):
+                    self.CI = 0
+                    break
+            else:
+                self.handleInstruction(instr, 0)   
+        
     def run(self, path):
 
-        program = self.load(path)
+        program = self.init(path)
+        for i in program:
+            self.load(i)
+        self.memory.burn()
+
+
+
 
     def jump(self, add):
         self.CI = int(add, 16)
     
     def jumpIfZero(self, add):
         if self.ACC == 0:
-            self.CI = int(add, 49)
+            self.CI = int(add, 16)
         else:
             self.CI += 2
 
     def jumpIfNegative(self, add):
         if self.ACC < 0:
-            self.CI = int(add, 49)
+            self.CI = int(add, 16)
         else:
             self.CI += 2
 
@@ -64,27 +96,28 @@ class MVNSimulator:
         self.ACC = int(value, 16)
         self.CI += 2
 
-    def sum(self, add):
-        self.ACC += int(self.memory.read(add), 16)
+    def addition(self, add):
+        self.ACC = self.ACC + int(self.memory.readByte(add)[0:2], 16)
         self.CI += 2
 
     def sub(self, add):
-        self.ACC -= int(self.memory.read(add), 16)
+        self.ACC -= int(self.memory.readByte(add)[0:2], 16)
         self.CI += 2
 
     def mult(self, add):
-        self.ACC *= int(self.memory.read(add), 16)
+        self.ACC *= int(self.memory.readByte(add)[0:2], 16)
         self.CI += 2
 
     def div(self, add):
-        self.ACC = self.ACC/int(self.memory.read(add), 16)
+        self.ACC = self.ACC/int(self.memory.readByte(add)[0:2], 16)
         self.CI += 2
 
     def loadMM(self, add):
-        self.ACC = int(self.memory.read(add), 16)
+        self.ACC = int(self.memory.readByte(add), 16)
+        self.CI += 2
 
     def storeMM(self, add):
-        self.memory.write(hex(int(add, 16) + 1), hex(self.ACC))
+        self.memory.write(hex(int(add, 16)), hex(self.ACC).split("x")[1])
         self.CI += 2
 
     def srCall(self, add):
@@ -105,15 +138,51 @@ class MVNSimulator:
         self.CI = int(add, 16)
 
     def getData(self, value):
-        self.ACC = value
+        self.ACC = int(value, 16)
         self.CI += 2
 
     def putData(self):
-        print(self.ACC)
         self.CI += 2
 
     def osCall(self):
         self.CI += 2
+
+    def handleInstruction(self, instr, value):
+        opcode = instr[0]
+        if opcode == "0":
+            self.jump(instr[1:])
+        elif opcode == "1":
+            self.jumpIfZero(instr[1:])
+        elif opcode == "2":
+            self.jumpIfNegative(instr[1:])
+        elif opcode == "3":
+            self.loadValue(instr[2:])
+        elif opcode == "4":
+            self.addition(instr[1:])
+        elif opcode == "5":
+            self.sub(instr[1:])
+        elif opcode == "6":
+            self.mult(instr[1:])
+        elif opcode == "7":
+            self.div(instr[1:])
+        elif opcode == "8":
+            self.loadMM(instr[1:])
+        elif opcode == "9":
+            self.storeMM(instr[1:])
+        elif opcode == "A":
+            self.srCall(instr[1:])
+        elif opcode == "B":
+            self.srReturn(instr[1:])
+        elif opcode == "C":
+            self.halt(instr[1:])
+        elif opcode == "D":
+            self.getData(value)
+        elif opcode == "E":
+            self.putData()
+        elif opcode == "F":
+            self.osCall()
+
+
 
     def parseAddress(self, address):
         add = address

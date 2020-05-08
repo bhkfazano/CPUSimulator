@@ -114,20 +114,25 @@ class Assembler:
         self.getInstructionsList(filePath)
         self.buildSymbolsTable()
         
+        block = []
         instr = self.instructions
         for i in instr:
             if len(i) > 1 and i[1] == "#":
                 print(" Montagem finalizada")
+                self.objectCode.append(block)
                 self.store(filePath)
                 return self.objectCode
             elif len(i) > 1 and i[1] == "@":
+                if len(block) != 0:
+                    self.objectCode.append(block)
+                block = []
                 self.CI = int(i[2].split("/")[1], 16)
 
             elif len(i) > 1 and i[1] == "K":
                 operand = i[2]
                 if len(i[2]) == 1:
                     operand = "0" + i[2]
-                self.objectCode.append([hex(self.CI).split("x")[1], "00" + operand[-2:]])
+                block.append([hex(self.CI).split("x")[1], operand[-2:]])
                 self.CI = self.CI + 2
 
             elif len(i) > 1 and i[1] in self.mnemonic:
@@ -146,7 +151,7 @@ class Assembler:
                 #print(i[0], operation, operand)
 
                 instruction = self.mnemonic[i[1]]["code"] + operand.split("x")[1]
-                self.objectCode.append([hex(self.CI).split("x")[1], instruction])
+                block.append([hex(self.CI).split("x")[1], instruction])
                 self.CI += self.mnemonic[i[1]]["size"]
       
         self.store(filePath)
@@ -179,17 +184,18 @@ class Assembler:
         self.mounted = False
 
     def store(self, filePath):
-
         fileName = filePath[:-3] + "hex"
         file = open(fileName, 'w')
 
-        metadata = self.parseAddress(self.objectCode.copy()[0][0])
-        metadata.append(hex(len(self.objectCode)).split("x")[1])
-        for i in metadata:
-            file.write(i + "\n")   
+        for block in self.objectCode:
+            metadata = self.parseAddress(block.copy()[0][0])
+            metadata.append(hex(len(block)).split("x")[1])
+            for i in metadata:
+                file.write(i + "\n")   
 
-        for i in self.objectCode:
-            file.write(i[1] + "\n")
+            for i in block:
+                file.write(i[1] + "\n")
+            file.write("x" + "\n")
         file.close()
 
     def parseAddress(self, add):
