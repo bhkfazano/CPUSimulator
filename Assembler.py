@@ -105,7 +105,10 @@ class Assembler:
 
                 else:
                     raise Exception('[Error] Double definition of value: {}'.format(i[0]))
-                self.CI = self.CI + 2
+                if i[1] in self.pseudo and i[1] == "K":
+                    self.CI = self.CI + 1
+                else:
+                    self.CI = self.CI + 2
         self.CI = 0
         self.step = 2
 
@@ -118,7 +121,6 @@ class Assembler:
         instr = self.instructions
         for i in instr:
             if len(i) > 1 and i[1] == "#":
-                print(" Montagem finalizada")
                 self.objectCode.append(block)
                 self.store(filePath)
                 return self.objectCode

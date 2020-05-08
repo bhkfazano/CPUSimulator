@@ -17,7 +17,7 @@ class Loader:
                 insert.append(loader[i][0][0:2])
                 insert.append(loader[i][0][2:])
         add = int(insert[0] + insert[1], 16)
-        print(insert)
+
         for i in insert[3:]:
             self.memory.write(hex(add), i)
             add += 1

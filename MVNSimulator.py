@@ -38,6 +38,7 @@ class MVNSimulator:
         for i in range(len(lines)):
             
             if lines[i] == "x":
+                block[2] = self.parseByte(hex(len(block[3:])).split("x")[1])
                 insert.append(block)
                 block = []
                 continue
@@ -50,14 +51,16 @@ class MVNSimulator:
         return insert
 
     def load(self, program):
-        
         op = ""
         counter = 0
         self.CI = 0
         while True:
             
             instr = self.memory.readInstruction(hex(self.CI))
-            print("CI | instr | ACC: ", hex(self.CI), instr, hex(self.ACC))
+            #print("CI | instr | ACC : ", hex(self.CI), instr, hex(self.ACC), program[counter])
+            if counter == len(program):
+                self.CI = 0
+                break
             if instr[0] == "D":
                 self.handleInstruction(instr, program[counter])
                 counter += 1
@@ -70,8 +73,8 @@ class MVNSimulator:
     def run(self, path):
 
         program = self.init(path)
-        for i in program:
-            self.load(i)
+        
+        self.load(program[0])
         self.memory.burn()
 
 
@@ -117,7 +120,7 @@ class MVNSimulator:
         self.CI += 2
 
     def storeMM(self, add):
-        self.memory.write(hex(int(add, 16)), hex(self.ACC).split("x")[1])
+        self.memory.write(add, self.parseByte(hex(self.ACC).split("x")[1]))
         self.CI += 2
 
     def srCall(self, add):
@@ -208,3 +211,11 @@ class MVNSimulator:
             return ["0" + add[0], add[-2:]]
         return [add[0:2], add [2:]]
     
+    def parseByte(self, byte, left=False):
+        if len(byte) == 1:
+            if left:
+                return byte + "0"
+            else:
+                return "0" +  byte
+        return byte
+

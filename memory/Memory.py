@@ -9,6 +9,7 @@ class Memory:
 
         file = open('./memory/memory.txt', 'r')
         self.mem = dict(line.split() for line in file)
+        file.close()
 
     def readInstruction(self, address):
         address  = hex(int(address, 16))
@@ -23,8 +24,8 @@ class Memory:
 
 
     def write(self, address, insert):
-        print("MM: ", address, insert)
-        self.mem[address]  = insert
+        self.mem[hex(int(address, 16))]  = insert
+        #print("MMW: ", hex(int(address, 16)), insert, self.mem[hex(int(address, 16))])
         return 1
 
     def burn(self):

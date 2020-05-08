@@ -25,6 +25,7 @@ CARRY
             LD  MSB
             +   ONE
             MM  MSB
+            +   ONE
             JP  RTN
 CHECK
             GD  0
