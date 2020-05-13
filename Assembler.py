@@ -30,7 +30,6 @@ class Assembler:
         for line in lines:
             if len(line) > 0 and (line[0] in self.mnemonic or line[0] in self.pseudo):
                 line.insert(0, False)
-
         self.instructions = lines
 
     def buildSymbolsTable(self):
@@ -38,6 +37,7 @@ class Assembler:
         instr = self.instructions
         
         for i in instr:
+
             if len(i) == 1:
 
                 self.symbolsTable[i[0]] = {
@@ -45,7 +45,6 @@ class Assembler:
                     "address" : hex(self.CI),
                     "value"   : ""
                 }
-
             elif i[1] not in self.mnemonic and i[1] not in self.pseudo:
                 raise Exception('[Error] Invalid instruction: {}'.format(i[1]))
             elif i[1] == "@":
@@ -53,7 +52,8 @@ class Assembler:
             elif i[1] == "#":
                 self.step = 2
                 self.CI = 0
-                return
+                for i in self.symbolsTable:
+                    print(i)
             else:
                 if i[0] and i[0] not in self.symbolsTable:
 
@@ -111,12 +111,19 @@ class Assembler:
                     self.CI = self.CI + 2
         self.CI = 0
         self.step = 2
+        for i in self.symbolsTable:
+            if not self.symbolsTable[i]["defined"]:
+                if "+" in i:
+                    label = i.split("+")[0]
+                    self.symbolsTable[i]["value"] = hex(int(self.symbolsTable[label]["address"], 16) + 1)
+                    self.symbolsTable[i]["address"] = hex(int(self.symbolsTable[label]["address"], 16) + 1)
+                    self.symbolsTable[i]["defined"] = True
+
 
     def assemble(self, filePath):
         self.reset()
         self.getInstructionsList(filePath)
         self.buildSymbolsTable()
-        
         block = []
         instr = self.instructions
         for i in instr:
@@ -127,6 +134,7 @@ class Assembler:
             elif len(i) > 1 and i[1] == "@":
                 if len(block) != 0:
                     self.objectCode.append(block)
+                print(block, len(block))
                 block = []
                 self.CI = int(i[2].split("/")[1], 16)
 
@@ -138,7 +146,6 @@ class Assembler:
                 self.CI = self.CI + 2
 
             elif len(i) > 1 and i[1] in self.mnemonic:
-                
                 operation = i[1]
                 operand = i[2]
                 if "/" in operand:
@@ -150,8 +157,6 @@ class Assembler:
                     operand = hex(int(operand, 16))
                 
                 operand = self.validateOperand(self.mnemonic[i[1]]["operand"], operand)
-                #print(i[0], operation, operand)
-
                 instruction = self.mnemonic[i[1]]["code"] + operand.split("x")[1]
                 block.append([hex(self.CI).split("x")[1], instruction])
                 self.CI += self.mnemonic[i[1]]["size"]
@@ -162,7 +167,7 @@ class Assembler:
     def validateOperand(self, type, operand):
         if type == "address":
             if len(operand) > 5:
-                raise Exception('[Error] Address should be 12 bits: {}'.format(address))
+                raise Exception('[Error] Address should be 12 bits: {}'.format(operand))
             elif len(operand) == 3:
                 operand = "0x" + "00" + operand.split("x")[1]
             elif len(operand) == 4:
@@ -190,13 +195,16 @@ class Assembler:
         file = open(fileName, 'w')
 
         for block in self.objectCode:
+            cs = 0
             metadata = self.parseAddress(block.copy()[0][0])
-            metadata.append(hex(len(block)).split("x")[1])
+            metadata.append(hex(len(block) + 1).split("x")[1])
             for i in metadata:
                 file.write(i + "\n")   
-
+                cs = cs + int(i, 16)
             for i in block:
                 file.write(i[1] + "\n")
+                cs = cs + int(i[1], 16)
+            file.write(hex(cs).split("x")[1][-2:] + "\n")
             file.write("x" + "\n")
         file.close()
 

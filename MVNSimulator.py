@@ -11,6 +11,7 @@ class MVNSimulator:
         self.assembler = Assembler()
         self.CI = 0    # 12 bits
         self.ACC = 0   # 8 bits
+        self.output = []
 
     def start(self):
 
@@ -31,14 +32,13 @@ class MVNSimulator:
         
         file = open('./userFiles/' + path, 'r')
         lines = [line.split()[0] for line in file]
-
         block = []
         insert = []
 
         for i in range(len(lines)):
             
             if lines[i] == "x":
-                block[2] = self.parseByte(hex(len(block[3:])).split("x")[1])
+                block[2] = self.parseByte(hex(len(block[3:-1])).split("x")[1])
                 insert.append(block)
                 block = []
                 continue
@@ -48,6 +48,17 @@ class MVNSimulator:
             else:
                 block.append(lines[i][0:2])
                 block.append(lines[i][2:])
+
+        for block in insert:
+            cs = 0
+            for i in block:
+                cs = cs + int(i, 16)
+            block[-1] = hex(cs - int(block[-1], 16)).split("x")[1][-2:]
+            
+        for i in insert:
+            for j in i:
+                print(j)
+
         return insert
 
     def load(self, program):
@@ -69,10 +80,11 @@ class MVNSimulator:
                     break
             else:
                 self.handleInstruction(instr, 0)   
+
         
     def run(self, path):
-
         program = self.init(path)
+
         for i in program:
             self.load(i)
         self.memory.burn()
@@ -80,7 +92,7 @@ class MVNSimulator:
 
         while True:
             instr = self.memory.readInstruction(hex(self.CI))
-            print(instr, self.ACC)
+            #print(instr, i)
             if instr[0] == "F" or instr[0] == "f":
                 self.CI = 0
                 break
@@ -88,6 +100,7 @@ class MVNSimulator:
         
         print("Output: ")
         print("ACC: ", self.ACC)
+        self.store()
 
     def jump(self, add):
         self.CI = int(add, 16)
@@ -109,11 +122,11 @@ class MVNSimulator:
         self.CI += 2
 
     def addition(self, add):
-        self.ACC = self.ACC + int(self.memory.readByte(add)[0:2], 16)
+        self.ACC = self.ACC + int(self.memory.readByte(add)[-2:], 16)
         self.CI += 2
 
     def sub(self, add):
-        self.ACC -= int(self.memory.readByte(add)[0:2], 16)
+        self.ACC -= int(self.memory.readByte(add)[-2:], 16)
         self.CI += 2
 
     def mult(self, add):
@@ -154,6 +167,7 @@ class MVNSimulator:
         self.CI += 2
 
     def putData(self):
+        self.output.append(hex(self.ACC)[-2:])
         self.CI += 2
 
     def osCall(self):
@@ -227,4 +241,11 @@ class MVNSimulator:
             else:
                 return "0" +  byte
         return byte
+
+    def store(self):
+        file = open("output.hex", 'w')
+
+        for line in self.output:
+            file.write(line + "\n") 
+        file.close()
 
