@@ -52,8 +52,6 @@ class Assembler:
             elif i[1] == "#":
                 self.step = 2
                 self.CI = 0
-                for i in self.symbolsTable:
-                    print(i)
             else:
                 if i[0] and i[0] not in self.symbolsTable:
 
@@ -134,7 +132,6 @@ class Assembler:
             elif len(i) > 1 and i[1] == "@":
                 if len(block) != 0:
                     self.objectCode.append(block)
-                print(block, len(block))
                 block = []
                 self.CI = int(i[2].split("/")[1], 16)
 
@@ -142,7 +139,7 @@ class Assembler:
                 operand = i[2]
                 if len(i[2]) == 1:
                     operand = "0" + i[2]
-                block.append([hex(self.CI).split("x")[1], operand[-2:]])
+                block.append([hex(self.CI).split("x")[1], operand])
                 self.CI = self.CI + 2
 
             elif len(i) > 1 and i[1] in self.mnemonic:
@@ -160,7 +157,6 @@ class Assembler:
                 instruction = self.mnemonic[i[1]]["code"] + operand.split("x")[1]
                 block.append([hex(self.CI).split("x")[1], instruction])
                 self.CI += self.mnemonic[i[1]]["size"]
-      
         self.store(filePath)
         return self.objectCode
 
@@ -193,20 +189,33 @@ class Assembler:
     def store(self, filePath):
         fileName = filePath[:-3] + "hex"
         file = open(fileName, 'w')
-
+        insert =[]
         for block in self.objectCode:
+            save = []
             cs = 0
             metadata = self.parseAddress(block.copy()[0][0])
-            metadata.append(hex(len(block) + 1).split("x")[1])
+            metadata.append("00")
             for i in metadata:
-                file.write(i + "\n")   
+                save.append(i)
                 cs = cs + int(i, 16)
             for i in block:
-                file.write(i[1] + "\n")
-                cs = cs + int(i[1], 16)
-            file.write(hex(cs).split("x")[1][-2:] + "\n")
-            file.write("x" + "\n")
+                if len(i[1]) <= 2:
+                    save.append(self.parseAddress(i[1])[1])
+                    cs = cs + int(i[1], 16)
+                else:
+                    save.append(self.parseAddress(i[1])[0])
+                    save.append(self.parseAddress(i[1])[1])
+                    cs = cs + int(i[1][0:2], 16)
+                    cs = cs + int(i[1][2:], 16)
+            save.append(hex(cs)[-2:])
+            save.append("||")
+            save[2] = hex(len(save[3:-2])).split("x")[1][-2:]
+            insert.append(save)
+        for i in insert:
+            for line in i:
+                file.write(line + "\n")
         file.close()
+
 
     def parseAddress(self, add):
         if len(add) == 1:

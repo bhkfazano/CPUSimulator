@@ -20,15 +20,28 @@ INCR  LD  LDA
       +    UM     
       MM   LDA
       JP   LDA
-FORA  HM   START
+FORA  HM   END
       @   /200
 UM    K   1      
 CONT  K   0       
 LDA0  LD INIC
       @   /F00    
-COMP  K   5      
-INIC  K   01
-      K   02
-      K   03
-      K   04
-      K   05
+COMP  K   10      
+INIC  K   42
+      K   52
+      K   55
+      K   4e
+      K   4f
+      K   48
+      K   45
+      K   4e
+      K   52
+      K   49
+      K   51
+      K   55
+      K   45
+      K   4b
+      K   4f
+      K   47
+END   OS  00
+      #   START

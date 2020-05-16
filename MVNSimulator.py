@@ -18,7 +18,7 @@ class MVNSimulator:
         objectCode = self.assemble('./userFiles/loader.asm')
         file = open('./userFiles/loader.hex', 'r')
         lines = [line[:-1].split() for line in file]
-        lines.remove(["x"])
+        lines.remove(["||"])
         self.loader.load(lines)
         self.memory.store()
 
@@ -35,29 +35,12 @@ class MVNSimulator:
         block = []
         insert = []
 
-        for i in range(len(lines)):
-            
-            if lines[i] == "x":
-                block[2] = self.parseByte(hex(len(block[3:-1])).split("x")[1])
+        for i in lines:
+            if i != "||":
+                block.append(i)
+            else:
                 insert.append(block)
                 block = []
-                continue
-
-            if len(lines[i]) <= 2:
-                    block.append(lines[i])
-            else:
-                block.append(lines[i][0:2])
-                block.append(lines[i][2:])
-
-        for block in insert:
-            cs = 0
-            for i in block:
-                cs = cs + int(i, 16)
-            block[-1] = hex(cs - int(block[-1], 16)).split("x")[1][-2:]
-            
-        for i in insert:
-            for j in i:
-                print(j)
 
         return insert
 
@@ -83,6 +66,7 @@ class MVNSimulator:
 
         
     def run(self, path):
+        self.output = []
         program = self.init(path)
 
         for i in program:
@@ -92,14 +76,14 @@ class MVNSimulator:
 
         while True:
             instr = self.memory.readInstruction(hex(self.CI))
-            #print(instr, i)
+            print("DEBUG:   ", "Instr: ", instr, "ACC: ", hex(self.ACC), "CI: ", hex(self.CI))
             if instr[0] == "F" or instr[0] == "f":
                 self.CI = 0
                 break
             self.handleInstruction(instr, 0) 
         
-        print("Output: ")
         print("ACC: ", self.ACC)
+        print("Output: ", self.output)
         self.store()
 
     def jump(self, add):
@@ -195,17 +179,17 @@ class MVNSimulator:
             self.loadMM(instr[1:])
         elif opcode == "9":
             self.storeMM(instr[1:])
-        elif opcode == "A":
+        elif opcode.upper() == "A":
             self.srCall(instr[1:])
-        elif opcode == "B":
+        elif opcode.upper() == "B":
             self.srReturn(instr[1:])
-        elif opcode == "C":
+        elif opcode.upper() == "C":
             self.halt(instr[1:])
-        elif opcode == "D":
+        elif opcode.upper() == "D":
             self.getData(value)
-        elif opcode == "E":
+        elif opcode.upper() == "E":
             self.putData()
-        elif opcode == "F":
+        elif opcode.upper() == "F":
             self.osCall()
 
 
