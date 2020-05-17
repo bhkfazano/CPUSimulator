@@ -1,9 +1,18 @@
         @    /445
-CODE
+CODE    HM   ST
 ST      JP   LDN3
 R3      +    AUX
         MM   AUX
-        JP   MMC1
+        /    SIXT
+        JZ   G1
+        *    SIXT
+        MM   AUX2
+        LD   AUX
+        -    AUX2
+        JP   G2
+        MM   AUX
+G1      LD   AUX
+G2      JP   MMC1
 R4      LD   COUNT
         -    ONE
         MM   COUNT
@@ -15,12 +24,19 @@ R4      LD   COUNT
         -    ONE
         MM   MMC0
         JP   ST
-SAVE    
-        LD   COUNT
+SAVE    HM   GO
+GO      LD   COUNT
         +    EIGHT
         MM   COUNT
 RR      JP   LDC1
-R5      PD   00
+R5      -    TEN
+        JN   G3
+        +    TEN
+        +    SUM2
+        JP   G4
+G3      +    TEN
+        +    SUM1
+G4      PD   00
         LD   COUNT
         -    ONE
         MM   COUNT
@@ -61,11 +77,13 @@ LDC1    K    86
 LDC0    K    08
         JP   R5
 AUX     K    00
+AUX2    K    00
 THIRTY  K    30
 ONE     K    01
 EIGHT   K    08
+SIXT    K    10
+TEN     K    0A
+SUM1    K    30
+SUM2    K    37
 COUNT   K    08
         #    
-
-
-        MUDAR LOGICA DE CODE PARA DIVISAO INTEIRA + JZ

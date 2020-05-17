@@ -5,29 +5,20 @@ BRUNOHENRIQUEKOG
 42 52 55 4e 4f 48 45 4e 52 49 51 55 45 4b 4f 47
 
         @    /445
-CONV    
-        JP   LDN1
-R1      +    THIRTY
-        JP   MMN1        
-R2      LD   COUNT
-        -    ONE
-        MM   COUNT
-        JZ   CODE
-        LD   LDN0
-        +    ONE
-        MM   LDN0
-        LD   MMN0
-        +    ONE
-        MM   MMN0
-        JP   CONV
 CODE
-        LD   COUNT
-        +    EIGHT
-        MM   COUNT
 ST      JP   LDN3
 R3      +    AUX
         MM   AUX
-        JP   MMC1
+        /    SIXT
+        JZ   G1
+        *    SIXT
+        MM   AUX2
+        LD   AUX
+        -    AUX2
+        JP   G2
+        MM   AUX
+G1      LD   AUX
+G2      JP   MMC1
 R4      LD   COUNT
         -    ONE
         MM   COUNT
@@ -75,10 +66,6 @@ CODIGO
         K    00
 LDN1    K    86
 LDN0    K    00
-        JP   R1
-MMN1    K    96
-MMN0    K    00
-        JP   R2
 LDN3    K    86
 LDN2    K    07
         JP   R3
@@ -89,8 +76,10 @@ LDC1    K    86
 LDC0    K    08
         JP   R5
 AUX     K    00
+AUX2    K    00
 THIRTY  K    30
 ONE     K    01
 EIGHT   K    08
+SIXT    K    10
 COUNT   K    08
         #    
