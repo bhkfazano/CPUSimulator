@@ -1,15 +1,36 @@
-INIC    @    /445
-CONV    
-        JP   MSBN
-RTN     +    30
+        @    /445
+CODE
+ST      JP   LDN3
+R3      +    AUX
+        MM   AUX
+        JP   MMC1
+R4      LD   COUNT
+        -    ONE
+        MM   COUNT
+        JZ   SAVE
+        LD   LDN2
+        -    ONE
+        MM   LDN2
+        LD   MMC0
+        -    ONE
+        MM   MMC0
+        JP   ST
+SAVE    
         LD   COUNT
-        -    01
-        JZ   CODE
-        LD   LSBN
-        +    01
-        JP   CONV
-CODE       #parei aqui 
-CTES    @    /600
+        +    EIGHT
+        MM   COUNT
+RR      JP   LDC1
+R5      PD   00
+        LD   COUNT
+        -    ONE
+        MM   COUNT
+        JZ   OK
+        LD   LDC0
+        +    ONE
+        MM   LDC0
+        JP   RR
+OK      OS   0000
+        @    /600
 NUSP
         K    00
         K    09
@@ -28,7 +49,23 @@ CODIGO
         K    00
         K    00
         K    00
+LDN1    K    86
+LDN0    K    00
+LDN3    K    86
+LDN2    K    07
+        JP   R3
+MMC1    K    96
+MMC0    K    0F
+        JP   R4
+LDC1    K    86
+LDC0    K    08
+        JP   R5
+AUX     K    00
+THIRTY  K    30
+ONE     K    01
+EIGHT   K    08
 COUNT   K    08
-MSBN    K    96
-LSBN    K    00
-        JP   RTN
+        #    
+
+
+        MUDAR LOGICA DE CODE PARA DIVISAO INTEIRA + JZ

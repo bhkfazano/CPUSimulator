@@ -73,7 +73,7 @@ class MVNSimulator:
             self.load(i)
         self.memory.burn()
         self.CI = int(program[0][0] + program[0][1], 16)
-
+        self.ACC = 0
         while True:
             instr = self.memory.readInstruction(hex(self.CI))
             print("DEBUG:   ", "Instr: ", instr, "ACC: ", hex(self.ACC), "CI: ", hex(self.CI))
@@ -118,7 +118,7 @@ class MVNSimulator:
         self.CI += 2
 
     def div(self, add):
-        self.ACC = self.ACC/int(self.memory.readByte(add)[0:2], 16)
+        self.ACC = self.ACC//int(self.memory.readByte(add)[0:2], 16)
         self.CI += 2
 
     def loadMM(self, add):
