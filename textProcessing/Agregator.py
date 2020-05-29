@@ -4,11 +4,18 @@ class Agregator:
     def __init__(self, delimiter):
         self.delimiter = delimiter
         self.wordlist = {}
+
+    def eventHandler(self, eventType):
+        if eventType == "GET_WORD_LIST":
+            return self.agregate()
+
+    def dispatchEvent(self, eventType):
+        return self.delimiter.eventHandler(eventType)
     
     def agregate(self):
         
         while True:
-            word = self.delimiter.delimit()
+            word = self.dispatchEvent("GET_WORDS")
             if word == False:
                 break
             if word[2] == True:

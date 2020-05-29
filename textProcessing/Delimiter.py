@@ -6,13 +6,20 @@ class Delimiter:
         self.word = ""
         self.data = ["", "", False]
         self.classificator = classificator
+
+    def eventHandler(self, eventType):
+        if eventType == "GET_WORDS":
+            return self.delimit()
+
+    def dispatchEvent(self, eventType):
+        return self.classificator.eventHandler(eventType)
     
     def delimit(self):
 
         self.data = ["", "", False]
         while True:
         
-            char = self.classificator.extract()
+            char = self.dispatchEvent("GET_CHAR")
             if char == False:
                 return False
             if char[1] == False:

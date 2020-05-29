@@ -14,6 +14,10 @@ class Classificator:
         for line in file:
             print(counter, line)
             counter += 1
+
+    def eventHandler(self, eventType):
+        if eventType == "GET_CHAR":
+            return self.extract()
     
     def extract(self):
 
@@ -27,7 +31,7 @@ class Classificator:
 
             if first == True:
                 self.first = False
-                
+
             res = [line[0], line[0].isalpha(), first, self.counter]
             if len(self.file[0]) == 1:
                 self.file = self.file[1:]

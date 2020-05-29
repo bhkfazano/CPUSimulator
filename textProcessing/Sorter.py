@@ -5,9 +5,16 @@ class Sorter:
         self.agregator = agregator
         self.data = []
     
+    def eventHandler(self, eventType):
+        if eventType == "GET_CROSS_REFERENCE_TABLE":
+            return self.sort()
+
+    def dispatchEvent(self, eventType):
+        return self.agregator.eventHandler(eventType)
+    
     def sort(self):
 
-        wordlist = self.agregator.agregate()
+        wordlist = self.dispatchEvent("GET_WORD_LIST")
 
         for key, value in sorted(wordlist.items()):
             entry = [key, value[0], value[2]]
