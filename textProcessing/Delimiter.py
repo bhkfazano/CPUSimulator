@@ -14,9 +14,14 @@ class Delimiter:
         return eventType, payload
     
     def delimit(self, char):
-
         if char == False:
-            return self.dispatchEvent("GET_WORD_LIST", False)
+            data = 0
+            if self.word != "":
+                self.data[1] = self.word.lower()
+                data = self.data
+                self.word = ""
+                self.data = ["", "", False]
+            return self.dispatchEvent("GET_WORD_LIST", data)
         if char[1] == False:
             self.data[0] = char[3]
             self.data[1] = self.word.lower()
@@ -27,5 +32,6 @@ class Delimiter:
         else:
             if char[2] == True:
                 self.data[2] = True
+            self.data[0] = char[3]
             self.word += char[0]
             return self.dispatchEvent("GET_CHAR", 0)
