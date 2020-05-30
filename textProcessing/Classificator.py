@@ -18,13 +18,15 @@ class Classificator:
     def eventHandler(self, eventType):
         if eventType == "GET_CHAR":
             return self.extract()
+
+    def dispatchEvent(self, eventType, payload):
+        return eventType, payload
     
     def extract(self):
 
         res = []
         if len(self.file) == 0:
-            return False
-
+            return self.dispatchEvent("GET_WORDS", False)
         line = self.file[0]
         if len(line) > 0:
             first = self.first
@@ -39,4 +41,4 @@ class Classificator:
                 self.first = True
             else:
                 self.file[0] = self.file[0][1:]
-            return res
+            return self.dispatchEvent("GET_WORDS", res)

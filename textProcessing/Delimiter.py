@@ -2,35 +2,30 @@ from Classificator import *
 
 class Delimiter:
 
-    def __init__(self, classificator):
+    def __init__(self):
         self.word = ""
         self.data = ["", "", False]
-        self.classificator = classificator
 
-    def eventHandler(self, eventType):
+    def eventHandler(self, eventType, payload):
         if eventType == "GET_WORDS":
-            return self.delimit()
-
-    def dispatchEvent(self, eventType):
-        return self.classificator.eventHandler(eventType)
-    
-    def delimit(self):
-
-        self.data = ["", "", False]
-        while True:
+            return self.delimit(payload)
         
-            char = self.dispatchEvent("GET_CHAR")
-            if char == False:
-                return False
-            if char[1] == False:
-                # if len(self.word) == 0:
-                #     self.word = char[0]
-                self.data[0] = char[3]
-                self.data[1] = self.word.lower()
-                data = self.data
-                self.word = ""
-                return self.data
-            else:
-                if char[2] == True:
-                    self.data[2] = True
-                self.word += char[0]
+    def dispatchEvent(self, eventType, payload):
+        return eventType, payload
+    
+    def delimit(self, char):
+
+        if char == False:
+            return self.dispatchEvent("GET_WORD_LIST", False)
+        if char[1] == False:
+            self.data[0] = char[3]
+            self.data[1] = self.word.lower()
+            data = self.data
+            self.word = ""
+            self.data = ["", "", False]
+            return self.dispatchEvent("GET_WORD_LIST", data)
+        else:
+            if char[2] == True:
+                self.data[2] = True
+            self.word += char[0]
+            return self.dispatchEvent("GET_CHAR", 0)
