@@ -32,9 +32,11 @@ class Memory:
         file = open('./memory/memory.txt', 'w')
         for i in range(4069):
             file.write(hex(i) + "    " + self.mem[hex(i)] + "\n")
+        file.close()
 
     def store(self):
     
         file = open('./memory/memory.txt', 'r')
         self.mem = dict(line.split() for line in file)
+        file.close()
 

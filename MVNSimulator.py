@@ -76,7 +76,7 @@ class MVNSimulator:
         self.ACC = 0
         while True:
             instr = self.memory.readInstruction(hex(self.CI))
-            print("DEBUG:   ", "Instr: ", instr, "ACC: ", hex(self.ACC), "CI: ", hex(self.CI))
+            #print("DEBUG:   ", "Instr: ", instr, "ACC: ", hex(self.ACC), "CI: ", hex(self.CI))
             if instr[0] == "F" or instr[0] == "f":
                 self.CI = 0
                 break
@@ -140,8 +140,16 @@ class MVNSimulator:
         self.CI = int(add, 16)
 
     def halt(self, add):
+        self.memory.burn()
         option = ""
-        option = input("\n MVNSimulator $ Pressione qualquer tecla para continuar")
+        print("STATUS: ")
+        print("NUSP + CODIGO: ")
+        aux = 1536
+        end = 1536 + 16
+        while aux != end:
+            print(self.memory.readByte(hex(aux)), " ", end = " ")
+            aux += 1
+        option = input("\n MVNSimulator $ Pressione qualquer tecla + enter para continuar: ")
         while len(option) == 0:
             continue
         self.CI = int(add, 16)
@@ -151,7 +159,7 @@ class MVNSimulator:
         self.CI += 2
 
     def putData(self):
-        self.output.append(hex(self.ACC)[-2:])
+        self.output.append(hex(self.ACC).split("x")[1])
         self.CI += 2
 
     def osCall(self):
